@@ -50,16 +50,19 @@ app.post("/upload", upload.single("profile"), (req, res) => {
         console.log(err);
       }
       let path = `./${req.file.path}`;
+      let fileExt = req.file.filename.split(".")
       cloudinary.v2.uploader.upload(path, function (error, result) {
         // console.log("Result:", result, error);
         if (result) {
+          let response=result.public_id+"."+fileExt[1]
+          res.end(response)
           Fs.unlink(req.file.path, function (err) {
             if (err) console.log(err);
             console.log("file deleted successfully");
           });
         }
       });
-      res.end(req.file.filename);
+      // res.end(req.file.filename);
     });
   }
 });
