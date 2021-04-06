@@ -11,6 +11,10 @@
         "api_secret":{
             "description": "API secret.",
             "value": "TS3RBptIMuiGJgBXLO5lP59XBnk"
+        },
+        "SERVER_PORT":{
+            "description":"SERVER PORT",
+            "value":3000
         }
     }
 }
