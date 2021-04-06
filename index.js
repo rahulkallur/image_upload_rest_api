@@ -5,13 +5,12 @@ const dotenv = require("dotenv");
 dotenv.config();
 const path = require("path");
 const Minio = require("minio");
+const cloudinary = require("cloudinary");
 
-var client = new Minio.Client({
-  endPoint: process.env.MinioEndPoint,
-  port: 443,
-  useSSL: true,
-  accessKey: process.env.MinioAccessKey,
-  secretKey: process.env.MinioSecretKey,
+cloudinary.config({
+  cloud_name: process.env.cloud_name,
+  api_key: process.env.api_key,
+  api_secret: process.env.api_secret,
 });
 
 const storage = multer.diskStorage({
@@ -37,50 +36,33 @@ app.use("/profile", express.static("./"));
 app.post("/upload", upload.single("profile"), (req, res) => {
   // console.log("Req:",req.body.bucketName)
   var Fs = require("fs");
-  if(!req.file){
+  if (!req.file) {
     return res
       .status(400)
-      .send(
-        'File not supplied. Input text name for File should be "profile"',
-      );
+      .send('File not supplied. Input text name for File should be "profile"');
   }
 
-  if (!req.body.bucketName) {
-    Fs.unlink(req.file.path, function (err) {
-      if (err) console.log(err);
-      console.log("file deleted successfully");
+  if (req.file) {
+    var file = req.file.path;
+    var fileStream = Fs.createReadStream(file);
+    var fileStat = Fs.stat(file, function (err, stats) {
+      if (err) {
+        console.log(err);
+      }
+      let path = `./${req.file.path}`;
+      cloudinary.v2.uploader.upload(path, function (error, result) {
+        console.log("Result:", result, error);
+        if (result) {
+          Fs.unlink(req.file.path, function (err) {
+            if (err) console.log(err);
+            console.log("file deleted successfully");
+          });
+        }
+      });
+      res.end(req.file.filename);
     });
-    return res
-      .status(400)
-      .send(
-        'BucketName not supplied. Input text name for bucketName should be "bucketName"',
-      );
   }
-  if(req.file && req.body.bucketName){
-  var file = req.file.path;
-  var fileStream = Fs.createReadStream(file);
-  var fileStat = Fs.stat(file, function (err, stats) {
-    if (err) {
-      console.log(err);
-    }
-    client.putObject(
-      req.body.bucketName,
-      req.file.filename,
-      fileStream,
-      stats.size,
-      function (err, etag) {
-        console.log("Response:", err, etag); // err should be null
-      },
-    );
-    res.end(req.file.filename);
-  });
-  Fs.unlink(req.file.path, function (err) {
-    if (err) console.log(err);
-    console.log("file deleted successfully");
-  });
-}
 });
-
 app.listen(process.env.SERVER_PORT, () => {
   console.log("Listening at http://localhost:" + process.env.SERVER_PORT);
 });
