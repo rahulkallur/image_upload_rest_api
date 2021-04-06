@@ -51,7 +51,7 @@ app.post("/upload", upload.single("profile"), (req, res) => {
       }
       let path = `./${req.file.path}`;
       cloudinary.v2.uploader.upload(path, function (error, result) {
-        console.log("Result:", result, error);
+        // console.log("Result:", result, error);
         if (result) {
           Fs.unlink(req.file.path, function (err) {
             if (err) console.log(err);
