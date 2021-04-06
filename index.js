@@ -6,6 +6,7 @@ dotenv.config();
 const path = require("path");
 const Minio = require("minio");
 const cloudinary = require("cloudinary");
+const SERVER_PORT = process.env.SERVER_PORT || 3000
 
 cloudinary.config({
   cloud_name: process.env.cloud_name,
@@ -63,6 +64,6 @@ app.post("/upload", upload.single("profile"), (req, res) => {
     });
   }
 });
-app.listen(process.env.SERVER_PORT, () => {
-  console.log("Listening at http://localhost:" + process.env.SERVER_PORT);
+app.listen(SERVER_PORT, () => {
+  console.log("Listening at http://localhost:" + SERVER_PORT);
 });
